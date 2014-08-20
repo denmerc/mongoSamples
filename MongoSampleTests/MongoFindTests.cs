@@ -37,9 +37,9 @@ namespace MongoSampleTests
             cursor.Skip = 100;
             cursor.Limit = 10;
 
-            foreach (var developer in cursor) {
-                Console.WriteLine(developer.LastName);
-            }
+            //foreach (var developer in cursor) {
+            //    Console.WriteLine(developer.LastName);
+            //}
         }
 
         [TestMethod]
@@ -51,8 +51,8 @@ namespace MongoSampleTests
                 { "_id", documentId }
             });
 
-            var readQuery = Query<Developer>.EQ(n => n.PersonId, 2);
-            Developer developerRead = collection.FindOne(readQuery);
+            //var readQuery = Query<Developer>.EQ(n => n.PersonId, 2);
+            //Developer developerRead = collection.FindOne(readQuery);
         }
     }
 }

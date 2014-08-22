@@ -49,28 +49,28 @@ namespace MongoSampleTests
            // SampleFilters.ForEach(x => x.IsSelected = r.NextDouble() > 0.5);
 
 
-            for (int i = 0; i < 100; i++)
-            {
-                Context.Tags.Insert(new Tag());
-            }
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    Context.Tags.Insert(new Tag());
+            //}
 
-            var query =
-                from e in Context.Tags.AsQueryable()
-                select e;
+            //var query =
+            //    from e in Context.Tags.AsQueryable()
+            //    select e;
 
 
-            int idCount = 0;
+            //int idCount = 0;
 
-            foreach (var t in query)
-            {
-                t.Code = "Code" + idCount;
-                t.Description = "Description" + idCount;
-                Context.Tags.Save(t);
-                Assert.IsNotNull(t);
+            //foreach (var t in query)
+            //{
+            //    t.Code = "Code" + idCount;
+            //    t.Description = "Description" + idCount;
+            //    Context.Tags.Save(t);
+            //    Assert.IsNotNull(t);
 
-                idCount++;
+            //    idCount++;
                 
-            }
+            //}
 
         }
 
@@ -117,18 +117,15 @@ namespace MongoSampleTests
 
             var query =
                 from e in collection.AsQueryable()
-                where e.Code == "fcode-24"
+                where e.Type == FilterType.ProductType
                 select e;
 
             foreach (var filter in query)
             {
                 Assert.IsNotNull(filter);
-                Assert.AreEqual("fcode-24", filter.Code);
-                Assert.AreEqual("filter-et", filter.Description);
-                Debug.WriteLine(filter.Code);
-                Debug.WriteLine(filter.Description);
+                Assert.AreEqual("Movement", filter.Type);
             }
-
+                        
         }
 
         [TestMethod]
@@ -141,6 +138,27 @@ namespace MongoSampleTests
             {
                 // note that this requires the extension methods in System.Linq
                 List<Filter> filters = cursor.ToList<Filter>();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [TestMethod]
+        public void FilterDistinct()
+        {
+            var collection = Context.Filters;
+
+            var cursor =
+                    from a in collection.FindAllAs<Filter>()
+                    where a.Type == FilterType.VendorCode
+                    select a.Type;
+
+            try
+            {
+                // note that this requires the extension methods in System.Linq
+                List<FilterType> filters = cursor.Distinct().ToList();
             }
             catch (Exception ex)
             {
@@ -170,5 +188,115 @@ namespace MongoSampleTests
             }
         }
 
+        [TestMethod]
+        public void Tags_MasterList_Bson_AddedAsString()
+        {
+            var collection = Context.Analytics;
+
+            try
+            {
+                var cursor = collection.Distinct(
+
+                    "Tags"
+
+                    );
+
+                    //new MongoDB.Driver.QueryDocument{}
+
+                var d = new List<string>();
+                foreach (var item in cursor)
+                {
+                    
+                    d.Add(item.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        [TestMethod]
+        public void Tags_Per_Analytic()
+        {
+            var collection = Context.Analytics;
+
+            try
+            {
+                var tags = from a in collection.AsQueryable<Analytic>()
+                           select a.Tags.Distinct();
+                foreach (var item in tags)
+                {
+                    Console.WriteLine(item);
+                }
+                
+
+                var count = tags.Count();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [TestMethod]
+        public void SearchAnalyticsByTag()
+        {
+            var collection = Context.Analytics;
+
+            try
+            {
+                //var cursor = collection.AsQueryable();
+
+                //var cursor = collection.Distinct<string>(
+                //    "Tags"
+
+                //    );
+                var tags = from a in collection.AsQueryable<Analytic>()
+                           select a.Tags.Distinct();
+
+                //IEnumerable<BsonValue> to list<string>
+                //new MongoDB.Driver.QueryDocument{}
+
+
+               
+
+                var query = collection.AsQueryable()
+                    .Where(a => a.Tags.In(tags));
+                
+                
+                
+                //var tagToSearch = tags.First();
+                //single tag
+                //var query2 = collection.AsQueryable().Where(a => a.Tags.Contains("tag-vero"));
+
+                foreach (var a in query)
+                {
+
+
+                    //List<Analytic> analytics = collection.FindAllAs<Analytic>(
+                    //    new MongoDB.Driver.QueryDocument{
+                    //        {"Tags", { "$in" , ["tag-fuga"]}}
+                        
+                    //});
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+
+        [TestMethod]
+        public void GetAllAnalytics()
+        {
+            var collection = Context.Analytics;
+
+        }
     }
 }

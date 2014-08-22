@@ -9,10 +9,12 @@ namespace Domain
 {
         public class Tag
         {
-            [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-            public string Id { get; set; }
-            public string Code { get; set; }
-            public string Description { get; set; }
+            //[BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
+            //public string Id { get; set; }
+            //public string Code { get; set; }
+            //public string Description { get; set; }
+            public string Value { get; set; }
+            
         }
 
         public class Folder
@@ -74,26 +76,27 @@ namespace Domain
         {
             [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
             public string Id { get; set; }
-            [BsonElement("name")]
+            
             public string Name { get; set; }
-            [BsonElement("status")]
+            
             public string Status { get; set; }
-            [BsonElement("description")]
+            
             public string Description { get; set; }
-            public DateTime lastUpdated { get; set; }
-            public string lastUserUpdated { get; set; }
+            public DateTime LastUpdated { get; set; }
+            public string LastUserUpdated { get; set; }
             public string Comments { get; set; }
             //public string Group1 { get; set; }
             //public string Group2 { get; set; }
             //public string Folder { get; set; }
-            [BsonElement("tags")]
-            public IList<string> Tags { get; set; }
+            public List<string> Tags { get; set; }
+            //public IList<string> Drivers { get; set; }
             public bool Shared { get; set; }
-            [BsonElement("filters")]
-            public List<SelectedFilter> Filters { get; set; }
-            public List<ValueDriver> ValueDrivers { get; set; }
-            public List<PriceRoutine> RelatedPriceRoutinesIdentities { get; set; }
-            public List<Action> Actions { get; set; } // usually navigates to step in module eg - for analytic->filters, price lists, rounding
+            public List<FilterSet> Filters { get; set; }
+            [BsonElement("Drivers")]
+            public List<ValueDriver> Drivers { get; set; }
+            public List<PriceScheme> PriceSchemes { get; set; }
+            //public List<PriceRoutine> RelatedPriceRoutinesIdentities { get; set; }
+            //public List<Action> Actions { get; set; } // usually navigates to step in module eg - for analytic->filters, price lists, rounding
         }
 
         public class PriceRoutine
@@ -105,18 +108,35 @@ namespace Domain
             public List<PriceList> PriceLists { get; set; }
         }
 
+        public class PriceScheme
+        {
+            public PricingMode PricingMode { get; set; }
+            public List<PriceList> PriceLists { get; set; }
+        }
+
+
+        public enum PriceListType
+        {
+            Cost,
+            Sales,
+
+        }
 
         public class PriceList
         {
-
+            public int SortId { get; set; }
+            public string Type { get; set; }
+            public string Code { get; set; }
+            public string Description { get; set; }
+            public Boolean IsKey { get; set; }
         }
 
         public enum PricingMode
         {
             Single,
             Cascade,
-            GlobalKey,
-            GlobalKeyPlus
+            Global,
+            GlobalPlus
         }
 
 
@@ -143,17 +163,54 @@ namespace Domain
             Administration
         }
 
+        public enum ValueDriverType
+        {
+            Movement,
+            Markup,
+            DaysOnHand,
+            DaysLeadTime,
+            InStockRatio,
+            SalesTrendRatio
+        }
 
         public class ValueDriver
         {
-            public int Group { get; set; }
             public ValueDriverType @Type { get; set; }
+            public Mode Mode { get; set;}
+            public List<Group> Groups { get; set; }
+            
         }
 
-        public enum ValueDriverType
+        public enum Mode
+	    {
+	        Auto,
+            Manual
+	    }
+
+        public class Group
         {
-
+            public int LineItemId { get; set; }
+            public string GroupName { get; set; }
+            public int SkuCount { get; set; }
+            public int Min { get; set; }
+            public int Max { get; set; }
+            public double SalesValue { get; set; }
         }
+
+
+        public enum FilterType
+        {
+            VendorCode,
+            IsKit,
+            OnSale,
+            Category,
+            DiscountType,
+            StatusType,
+            ProductType,
+            StockClass
+        }
+
+        
 
         public class Filter
         {
@@ -164,14 +221,13 @@ namespace Domain
             public string Code { get; set; }
             [BsonElement("description")]
             public string Description { get; set; }
+            public FilterType Type { get; set; }
         }
 
-        public class SelectedFilter
+        public class FilterSet
         {
-            [BsonElement("type")]
             public string Type { get; set; }
-            [BsonElement("items")]
-            public List<Filter> Filters { get; set; }
+            public List<Filter> Items { get; set; }
         }
 
         public class EntityBase

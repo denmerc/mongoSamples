@@ -11,7 +11,7 @@ namespace MongoSampleTests
 {
     public class PromoContext
     {
-        private const string connectionString = "mongodb://promoUser:aplpromoter@ds027829.mongolab.com:27829/promo";
+        private const string connectionString = "";
         private const string databaseName = "promo";
         private const string TagsCollectionName = "tags";
         //public MongoDatabase Database;

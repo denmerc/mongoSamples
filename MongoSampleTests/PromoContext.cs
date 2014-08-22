@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
 
 namespace MongoSampleTests
 {
     public class PromoContext
     {
-        private const string connectionString = "";
+        private readonly string connectionString = ConfigurationManager.AppSettings["connectionString"].ToString();
         private const string databaseName = "promo";
         private const string TagsCollectionName = "tags";
         //public MongoDatabase Database;

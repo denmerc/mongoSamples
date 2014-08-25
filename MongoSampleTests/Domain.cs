@@ -7,6 +7,36 @@ using System.Threading.Tasks;
 
 namespace Domain
 {
+
+
+        public class Actions
+        {
+            [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
+            public string Id { get; set; }
+            public string Key { get; set; }
+            public List<Action> Items{ get; set; }
+        }
+
+        public class Action
+        {
+            [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
+            public string Id { get; set; }
+            public int SortId { get; set; }
+            public string Command { get; set; }
+            public string CommandType { get; set; }
+            public DisplayText DisplayText { get; set; }
+            public List<string> Ancestors { get; set; }
+            public List<string> Roles { get; set; }
+            public Boolean IsEnabled { get; set; }
+            public List<string> Parameters { get; set; }
+        }
+
+        public class DisplayText
+        {
+            public string Caption { get; set; }
+            public string Header { get; set; }
+            public string Tooltip { get; set; }
+        }
         public class Tag
         {
             //[BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]

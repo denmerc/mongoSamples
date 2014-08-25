@@ -5,6 +5,8 @@ using MongoDB.Driver.Linq;
 using Domain;
 using System.Diagnostics;
 using System.Collections.Generic;
+using MongoDB.Driver.Builders;
+using MongoDB.Bson;
 
 namespace MongoSampleTests
 {
@@ -109,34 +111,30 @@ namespace MongoSampleTests
 
 
         [TestMethod]
-        public void TestSerializingFilters()
+        public void Filters_GetFiltersByType()
         {
 
             var collection = Context.Filters;
 
-
             var query =
-                from e in collection.AsQueryable()
-                where e.Type == FilterType.ProductType
-                select e;
+                    from a in collection.FindAllAs<Filter>()
+                    where a.Type == FilterType.ProductType
+                    select a;
 
-            foreach (var filter in query)
-            {
-                Assert.IsNotNull(filter);
-                Assert.AreEqual("Movement", filter.Type);
-            }
+           
+            List<Filter> fList = query.ToList();
                         
         }
 
         [TestMethod]
-        public void FilterListBoxDataSource()
+        public void Filters_GetAllFilters()
         {
             var collection = Context.Filters;
 
             MongoDB.Driver.MongoCursor<Filter> cursor = collection.FindAllAs<Filter>();
             try
             {
-                // note that this requires the extension methods in System.Linq
+                //defaults to FilterCode because it first defined in Enum
                 List<Filter> filters = cursor.ToList<Filter>();
             }
             catch (Exception ex)
@@ -146,7 +144,7 @@ namespace MongoSampleTests
         }
 
         [TestMethod]
-        public void FilterDistinct()
+        public void Filters_GetDistinctFilterTypeList()
         {
             var collection = Context.Filters;
 
@@ -168,7 +166,7 @@ namespace MongoSampleTests
 
 
         [TestMethod]
-        public void Analytics_ToList()
+        public void Analytics_GetAllAnalytics()
         {
             var collection = Context.Analytics;
 
@@ -188,8 +186,8 @@ namespace MongoSampleTests
             }
         }
 
-        [TestMethod]
-        public void Tags_MasterList_Bson_AddedAsString()
+        [TestMethod, Ignore]
+        public void Analytics_GetTagsAsBson_AddedAsString()
         {
             var collection = Context.Analytics;
 
@@ -218,7 +216,7 @@ namespace MongoSampleTests
 
 
         [TestMethod]
-        public void Tags_Per_Analytic()
+        public void Analytics_GetListAllTagsUsedByAnalytics()
         {
             var collection = Context.Analytics;
 
@@ -226,14 +224,13 @@ namespace MongoSampleTests
             {
                 var tags = from a in collection.AsQueryable<Analytic>()
                            select a.Tags.Distinct();
-                foreach (var item in tags)
-                {
-                    Console.WriteLine(item);
-                }
-                
 
+
+                var list = tags.ToList();
                 var count = tags.Count();
 
+
+                Assert.IsTrue(count > 0);
             }
             catch (Exception ex)
             {
@@ -242,45 +239,33 @@ namespace MongoSampleTests
         }
 
         [TestMethod]
-        public void SearchAnalyticsByTag()
+        public void Analytics_GetAnalyticsByTag()
         {
             var collection = Context.Analytics;
 
             try
             {
-                //var cursor = collection.AsQueryable();
 
-                //var cursor = collection.Distinct<string>(
-                //    "Tags"
-
-                //    );
-                var tags = from a in collection.AsQueryable<Analytic>()
-                           select a.Tags.Distinct();
-
-                //IEnumerable<BsonValue> to list<string>
-                //new MongoDB.Driver.QueryDocument{}
+                //var query = collection.AsQueryable()
+                //    .Where(a => a.Tags.In(tags));
 
 
-               
+                //var tags = from a in collection.AsQueryable<Analytic>()
+                //           select a.Tags.Distinct();
 
-                var query = collection.AsQueryable()
-                    .Where(a => a.Tags.In(tags));
-                
-                
-                
-                //var tagToSearch = tags.First();
-                //single tag
-                //var query2 = collection.AsQueryable().Where(a => a.Tags.Contains("tag-vero"));
+                //single tag tag-consequatur
+                //var tagToSearch = tags.ToList().First();
+                var tags = new List<string> { "tag-consequatur" };
 
-                foreach (var a in query)
+                var query = collection.AsQueryable().Where(a => a.Tags.ContainsAny(tags));
+
+
+
+                var analyticsFoundWithTag = query.ToList();
+
+                foreach (var item in analyticsFoundWithTag)
                 {
-
-
-                    //List<Analytic> analytics = collection.FindAllAs<Analytic>(
-                    //    new MongoDB.Driver.QueryDocument{
-                    //        {"Tags", { "$in" , ["tag-fuga"]}}
-                        
-                    //});
+                    Assert.IsTrue(analyticsFoundWithTag.Count > 0);
                 }
 
             }
@@ -292,11 +277,128 @@ namespace MongoSampleTests
 
 
 
-        [TestMethod]
-        public void GetAllAnalytics()
+        [TestMethod, Ignore]
+        public void Options_GetActionsForAnalyticsModule()
         {
-            var collection = Context.Analytics;
+            try
+            {
+                var collection = Context.Actions;
+                var actions = from a in collection.AsQueryable<Actions>()
+                              where a.Key == "Commands"
+                                select a.Items;
 
+                var list = actions.ToList();
+
+            }
+            catch (Exception)
+            {
+                
+                throw;
+            }
         }
+
+         [TestMethod, Ignore]
+        public void Options_GetCommandsForAnalyticsModule()
+        {
+            try
+            {
+                var collection = Context.Actions;
+                var actions = from a in collection.AsQueryable<Actions>()
+                              where a.Key == "Commands"
+                              select a.Items;
+
+                var list = actions.ToList();
+
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+         [TestMethod, Ignore]
+        public void Options_GetCommandsForAnalytics_ActionsBar()
+        {
+            try
+            {
+                var collection = Context.ActionsAsDocuments;
+                //var actions = from a in collection.AsQueryable<Actions>()
+                //              where a.Key == "Commands"
+                //              select a.Items;
+
+                //foreach (var a in actions)
+                //{
+
+
+                //}
+                
+
+
+                List<BsonValue> ancestors = new List<BsonValue>();
+
+                ancestors.Add("Actions2");
+
+                var query = Query.And(
+                        Query.EQ("Key", "Commands"),
+                        Query.In("Items.Ancestors", ancestors)
+                    
+                    );
+
+
+                MongoDB.Bson.BsonDocument documentRead = collection.FindOne(query);
+
+
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        [TestMethod]
+         public void Commands_GetCommandsForAnalytics_ActionsBar()
+         {
+             try
+             {
+                 var collection = Context.Commands;
+                 //var actions = from a in collection.AsQueryable<Actions>()
+                 //              where a.Key == "Commands"
+                 //              select a.Items;
+
+                 //foreach (var a in actions)
+                 //{
+
+
+                 //}
+
+
+
+                 //List<BsonValue> ancestors = new List<BsonValue>();
+                 //ancestors.Add("Planning");
+                 //ancestors.Add("Analytics");
+                 //ancestors.Add("Actions2");
+
+                 var query = 
+                     Query.And(
+                         Query.In("Ancestors", new BsonArray(new List<string>{"Planning","Actions2"}))
+                     );
+
+
+                 List<Domain.Action> actions = collection.Find(query).ToList();
+
+                 Assert.IsTrue(actions.Count > 0);
+                     
+
+             }
+             catch (Exception)
+             {
+
+                 throw;
+             }
+         }
     }
 }

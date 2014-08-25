@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
+using MongoDB.Bson;
 
 namespace MongoSampleTests
 {
@@ -51,6 +52,29 @@ namespace MongoSampleTests
             get
             {
                 return database.GetCollection<Analytic>("analytics");
+            }
+        }
+
+        public MongoCollection<Actions> Actions
+        {
+            get
+            {
+                return database.GetCollection<Actions>("options");
+            }
+        }
+
+        public MongoCollection<BsonDocument> ActionsAsDocuments
+        {
+            get
+            {
+                return database.GetCollection("options");
+            }
+        }
+        public MongoCollection<Domain.Action> Commands
+        {
+            get
+            {
+                return database.GetCollection<Domain.Action>("commands");
             }
         }
     }
